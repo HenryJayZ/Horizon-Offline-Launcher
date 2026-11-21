@@ -3895,6 +3895,19 @@ impl Launcher {
                 trf("the update failed: {error}", &[("error", e)])
             ),
             SelfUpdate::Idle => match &self.updates.launcher {
+                // This build never replaces itself (backend::self_update_allowed), so say how a
+                // newer launcher gets installed instead of implying the button does it.
+                Some(r) if !backend::self_update_allowed() => format!(
+                    "{}  ·  {}",
+                    backend::VERSION,
+                    trf(
+                        "{version} available · this build updates by hand",
+                        &[(
+                            "version",
+                            backend::launcher_version(&r.tag).unwrap_or_default()
+                        )]
+                    )
+                ),
                 Some(r) => format!(
                     "{}  ·  {}",
                     backend::VERSION,

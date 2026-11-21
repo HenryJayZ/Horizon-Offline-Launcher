@@ -2893,6 +2893,11 @@ pub fn client_command(tag: &str) -> Command {
         .env_remove("HORIZON_ACCOUNT_SESSIONS")
         .arg("--resources")
         .arg(resources(tag));
+    // Shader API 0.2 packs (Neoqua, Daybreak) are drawn only when the game is asked for an HDR
+    // float frame (docs/api/shaders.md); this build asks unless the player turned it off.
+    if Settings::load().hdr_frame() {
+        cmd.env("HORIZON_HDR_FRAME", "float");
+    }
     // How the game asks for a renewed session (`account session`) while it runs.
     if let Ok(exe) = std::env::current_exe() {
         cmd.env("HORIZON_LAUNCHER_EXE", exe);
@@ -3499,9 +3504,12 @@ fn launcher_asset_running_from(appimage: bool) -> Option<&'static str> {
     }
 }
 
-/// Development builds and `HORIZON_LAUNCHER_NO_SELF_UPDATE` never replace themselves.
+/// This build never replaces itself. The launcher here is customised (the Shader API 0.2 switch,
+/// no automatic game updates), and a self-update would swap it for the official release and lose
+/// those changes. The version check still says when a newer launcher exists; installing it is the
+/// player's own download, or their package manager's.
 pub fn self_update_allowed() -> bool {
-    !cfg!(debug_assertions) && std::env::var_os("HORIZON_LAUNCHER_NO_SELF_UPDATE").is_none()
+    false
 }
 
 /// The version in `horizon-launcher --version`'s output (`horizon-launcher 0.1.5`).
@@ -4396,6 +4404,11 @@ pub struct Settings {
     /// default. Appended after the launcher's own arguments, so they can add to or override them.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub game_args: String,
+    /// Draw Shader API 0.2 shader packs: the game serves them only when it is asked for an HDR
+    /// float frame. Unset is on in this build (Neoqua and the other 0.2 packs need it); a player
+    /// who turns it off stores `false` and the game runs on its ordinary gamma frame.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hdr_frame: Option<bool>,
     /// The proxy every download goes through (`proxy`), such as `http://127.0.0.1:7890` or
     /// `socks5://127.0.0.1:1080`.
     /// Unset means none: the environment's `HTTPS_PROXY` and `HTTP_PROXY` apply instead.
@@ -4535,9 +4548,15 @@ impl Settings {
     pub fn language(&self) -> crate::i18n::Language {
         self.language.unwrap_or_else(crate::i18n::Language::system)
     }
-    /// Whether new Horizon versions are installed automatically.
+    /// Whether new Horizon versions are installed automatically. Off unless the player turned it
+    /// on: this is an offline launcher, so a nightly is never fetched behind their back.
     pub fn auto_install(&self) -> bool {
-        self.install_new_versions.unwrap_or(true)
+        self.install_new_versions.unwrap_or(false)
+    }
+    /// Whether the game is launched with `HORIZON_HDR_FRAME=float`, the switch it draws Shader
+    /// API 0.2 packs behind ([`Settings::hdr_frame`]). On unless the player turned it off.
+    pub fn hdr_frame(&self) -> bool {
+        self.hdr_frame.unwrap_or(true)
     }
     /// Whether old versions are deleted after an install.
     pub fn auto_prune(&self) -> bool {

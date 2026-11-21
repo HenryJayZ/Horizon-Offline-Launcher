@@ -303,6 +303,31 @@ impl Launcher {
         )
     }
 
+    /// The Game card's switch for Shader API 0.2 packs (`HORIZON_HDR_FRAME=float`).
+    fn hdr_frame_row(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        let on = self.settings.hdr_frame();
+        ui::setting_row(
+            tr("Draw Shader API 0.2 shader packs"),
+            Some(
+                div()
+                    .child(tr(
+                        "Starts the game with HORIZON_HDR_FRAME=float, the switch it draws 0.2 packs behind: Neoqua, Daybreak and the rest. On by default here; off runs the game on its ordinary gamma frame.",
+                    ))
+                    .into_any_element(),
+            ),
+            Some(
+                crate::switch("hdr-frame", on, &t)
+                    .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                        this.settings.hdr_frame = Some(!this.settings.hdr_frame());
+                        this.save_settings();
+                        cx.notify();
+                    }))
+                    .into_any_element(),
+            ),
+        )
+    }
+
     /// The Game card's Native mods row. The mockup has an on/off switch; native mods are always
     /// on here, so the row picks the profile they build with, as the Mods page does.
     fn native_mods_row(&mut self, cx: &mut Context<Self>) -> Div {
@@ -487,6 +512,7 @@ impl Launcher {
         let game = card()
             .child(self.game_architecture_row(n, cx))
             .child(self.game_args_row(n + 1, cx))
+            .child(self.hdr_frame_row(cx))
             .child(self.mods_auto_update_row(cx))
             .child(self.native_mods_row(cx));
         let ai = card()
