@@ -648,6 +648,29 @@ impl Launcher {
                             .pt(px(2.))
                             .child(tr("Modded by HenryJayz btw :3")),
                     ),
+                    // A newer launcher exists and this build never replaces itself: say so where
+                    // the player can act, and send them to this fork's releases.
+                    .when(self.updates.launcher.is_some(), |d| {
+                        d.child(
+                            div()
+                                .id("launcher-update")
+                                .flex()
+                                .flex_none()
+                                .items_center()
+                                .gap(px(6.))
+                                .px(px(8.))
+                                .pt(px(4.))
+                                .pb(px(6.))
+                                .cursor_pointer()
+                                .hover(|s| s.bg(white(0.06)))
+                                .child(ui::dot(ui::Tone::Live))
+                                .child(
+                                    ui::text(11., FontWeight::MEDIUM, ink::FULL)
+                                        .child(tr("Update available")),
+                                )
+                                .on_click(|_, _, cx| cx.open_url(backend::LAUNCHER_RELEASES)),
+                        )
+                    }),
             );
         }
 

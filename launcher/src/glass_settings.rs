@@ -115,7 +115,10 @@ impl Launcher {
         let sections = ui::flat_rows(|| self.glass_settings_sections(b, cx));
         let active = self.settings_section(sections.len());
         self.settings_marked = active;
-        let wide = self.window_width >= crate::glass_home::COMPACT;
+        // Two columns from 720 px up. The list never stacks above the page: doing that pushed
+        // the whole page below the fold and let the categories fill the window. Below 720 it
+        // becomes an icon rail, still beside the page.
+        let rail = self.window_width < 720.;
         let items: Vec<_> = SECTIONS
             .iter()
             .enumerate()
@@ -127,9 +130,10 @@ impl Launcher {
                         .flex()
                         .flex_none()
                         .items_center()
-                        .gap(px(if wide { 12. } else { 8. }))
-                        .h(px(if wide { 40. } else { 34. }))
-                        .px(px(if wide { 12. } else { 10. }))
+                        .when(rail, |d| d.justify_center())
+                        .gap(px(12.))
+                        .h(px(40.))
+                        .px(px(if rail { 0. } else { 12. }))
                         .rounded(px(radius::ROW))
                         .cursor_pointer()
                         .font_family(horizon_theme::glass::FONT)
@@ -152,7 +156,7 @@ impl Launcher {
                                 white(0.65)
                             },
                         ))
-                        .child(tr(label).to_string()),
+                        .when(!rail, |d| d.child(tr(label).to_string())),
                     &t,
                 )
                 .on_click(cx.listener(move |this, _: &ClickEvent, _, cx| {
@@ -161,26 +165,11 @@ impl Launcher {
                 }))
             })
             .collect();
-        let nav = if wide {
-            card()
-                .flex_none()
-                .w(px(210.))
-                .gap(px(4.))
-                .children(items)
-                .into_any_element()
-        } else {
-            crate::glass::plate(radius::PANEL)
-                .id("settings-nav-strip")
-                .flex_none()
-                .w_full()
-                .flex_row()
-                .overflow_x_scroll()
-                .on_scroll(|_, _, cx| cx.stop_propagation())
-                .gap(px(4.))
-                .p(px(6.))
-                .children(items)
-                .into_any_element()
-        };
+        let nav = card()
+            .flex_none()
+            .w(px(if rail { 64. } else { 240. }))
+            .gap(px(4.))
+            .children(items);
         let pane = div()
             .id("settings-pane")
             .flex_1()
@@ -207,26 +196,17 @@ impl Launcher {
             .pb(px(8.))
             .children(sections);
         let pane = self.settings_scroll.wrap_wide(pane, &t).flex_1().min_w_0().h_full();
-        let content = if wide {
-            div()
-                .flex()
-                .flex_row()
-                .items_start()
-                .gap(px(12.))
-                .flex_1()
-                .min_h_0()
-                .child(nav)
-                .child(pane)
-        } else {
-            div()
-                .flex()
-                .flex_col()
-                .gap(px(12.))
-                .flex_1()
-                .min_h_0()
-                .child(nav)
-                .child(pane)
-        };
+        // Always beside the page, never above it: the categories must not take the window's
+        // height and push the content to the bottom.
+        let content = div()
+            .flex()
+            .flex_row()
+            .items_start()
+            .gap(px(12.))
+            .flex_1()
+            .min_h_0()
+            .child(nav)
+            .child(pane);
         div()
             .flex()
             .flex_col()

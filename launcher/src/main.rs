@@ -2748,6 +2748,54 @@ fn notice(text_: String, t: &Theme) -> Div {
         .child(div().flex_1().min_w_0().child(text_))
 }
 
+    /// New here, and preparing failed for want of Java: where to get a runtime (SKlauncher's
+    /// installer brings one), and where the newest release is. Horizon reads a player's own
+    /// Minecraft: Java Edition install through Java, so a machine with none cannot prepare yet.
+    fn java_help(&mut self, cx: &mut Context<Self>) -> Div {
+        let t = self.theme;
+        plate(&t)
+            .flex()
+            .flex_col()
+            .gap(px(10.))
+            .p(px(16.))
+            .text_size(px(theme::UI.px))
+            .line_height(px(21.))
+            .text_color(t.ink)
+            .border_l(px(6.))
+            .child(
+                div()
+                    .absolute()
+                    .top(px(-2.))
+                    .bottom(px(-2.))
+                    .left(px(-6.))
+                    .w(px(6.))
+                    .bg(t.accent),
+            )
+            .child(blocks::icon("user-add-01", 20., t.accent))
+            .child(div().flex_1().min_w_0().child(tr(
+                "Preparing Horizon reads your own Minecraft: Java Edition, which needs Java. New here? Download SKlauncher — its installer brings Java — then get the latest release, 26.3, from Versions.",
+            )))
+            .child(
+                div()
+                    .flex()
+                    .flex_wrap()
+                    .gap(px(8.))
+                    .mt(px(4.))
+                    .child(
+                        button("java-help-sklauncher", "Get SKlauncher", Kind::Secondary, &t)
+                            .on_click(|_, _, cx| cx.open_url(backend::SKLAUNCHER_DOWNLOADS)),
+                    )
+                    .child(
+                        button("java-help-versions", "Versions", Kind::Ghost, &t).on_click(
+                            cx.listener(|this, _: &ClickEvent, _, cx| {
+                                this.go(Page::Versions);
+                                cx.notify();
+                            }),
+                        ),
+                    ),
+            )
+    }
+
 /// An empty state: a short sentence, and the one thing to do about it.
 fn centered(text_: &str, t: &Theme) -> Div {
     div()
@@ -3684,7 +3732,12 @@ impl Launcher {
         };
         let mut page = div().flex().flex_col().gap(px(28.)).child(banner);
         if let Some(e) = self.prepare_error.clone() {
-            page = page.child(notice(e, &t));
+            page = page.child(notice(e.clone(), &t));
+            // Preparing reads the player's own Minecraft install through Java: with none on the
+            // machine, say where to get one and where the newest release is.
+            if e.to_uppercase().contains("JAVA") {
+                page = page.child(self.java_help(cx));
+            }
         }
         page = page.child(if t.glass {
             self.glass_home_tabs(rows, cx)

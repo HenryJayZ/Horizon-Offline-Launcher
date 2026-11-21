@@ -3504,10 +3504,10 @@ fn launcher_asset_running_from(appimage: bool) -> Option<&'static str> {
     }
 }
 
-/// This build never replaces itself. The launcher here is customised (the Shader API 0.2 switch,
-/// no automatic game updates), and a self-update would swap it for the official release and lose
-/// those changes. The version check still says when a newer launcher exists; installing it is the
-/// player's own download, or their package manager's.
+/// This build never replaces itself. The launcher here is customised (the Shader API 0.2 switch
+/// and the settings layout), and a self-update would swap it for the official release and lose
+/// those changes. The version check still says when a newer launcher exists, and the sidebar's
+/// "update available" line links to where to download it; installing it is the player's own job.
 pub fn self_update_allowed() -> bool {
     false
 }
@@ -4007,6 +4007,15 @@ pub fn place_staged(staged: &Staged) -> Result<(), String> {
 pub fn download_page(website: &str) -> String {
     format!("{}/docs/install", website.trim_end_matches('/'))
 }
+
+/// Where this fork's launcher builds are published. The build never replaces itself, so the
+/// sidebar's "update available" line sends the player here to download the newer one.
+pub const LAUNCHER_RELEASES: &str =
+    "https://github.com/HenryJayZ/Horizon-Offline-Launcher/releases";
+
+/// SKlauncher, a Minecraft: Java Edition launcher: its installer brings a Java runtime, which is
+/// what Horizon's prepare needs to read a player's own Minecraft install.
+pub const SKLAUNCHER_DOWNLOADS: &str = "https://skmedix.pl/downloads";
 
 /// Whether this copy of the launcher can't put a new one in its place: its folder is read-only (a
 /// disk image, or the read-only copy macOS runs a downloaded app from until it is moved, its "App
@@ -4548,10 +4557,9 @@ impl Settings {
     pub fn language(&self) -> crate::i18n::Language {
         self.language.unwrap_or_else(crate::i18n::Language::system)
     }
-    /// Whether new Horizon versions are installed automatically. Off unless the player turned it
-    /// on: this is an offline launcher, so a nightly is never fetched behind their back.
+    /// Whether new Horizon versions are installed automatically.
     pub fn auto_install(&self) -> bool {
-        self.install_new_versions.unwrap_or(false)
+        self.install_new_versions.unwrap_or(true)
     }
     /// Whether the game is launched with `HORIZON_HDR_FRAME=float`, the switch it draws Shader
     /// API 0.2 packs behind ([`Settings::hdr_frame`]). On unless the player turned it off.

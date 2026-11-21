@@ -650,7 +650,37 @@ impl Launcher {
                 })),
             &t,
         );
-        let mut wrap = div().relative().child(button);
+        // Beside the version: the picker lists what the releases and the folders on disk say, so
+        // a refresh asks for both again (the newest official release, and anything installed
+        // since).
+        let refresh = keyboard(
+            div()
+                .id("picker-refresh")
+                .flex()
+                .flex_none()
+                .items_center()
+                .justify_center()
+                .h(px(TALL))
+                .w(px(TALL))
+                .rounded(px(radius::LARGE))
+                .bg(white(fill::BUTTON))
+                .hover(|s| s.bg(white(fill::ACTIVE)))
+                .cursor_pointer()
+                .child(ui::icon("refresh", 18., white(ink::NOTE)))
+                .on_click(cx.listener(|this, _: &ClickEvent, _, cx| {
+                    this.installed = crate::backend::installed();
+                    this.check_updates();
+                    cx.notify();
+                })),
+            &t,
+        );
+        let mut wrap = div()
+            .relative()
+            .flex()
+            .items_center()
+            .gap(px(8.))
+            .child(button)
+            .child(refresh);
         if open {
             let follows = self.launcher_version().cloned();
             // A solid backing under the glass, as the language menu's: the plate's backdrop
