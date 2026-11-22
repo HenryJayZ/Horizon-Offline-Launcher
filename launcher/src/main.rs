@@ -2781,11 +2781,11 @@ fn notice(text_: String, t: &Theme) -> Div {
                     .gap(px(8.))
                     .mt(px(4.))
                     .child(
-                        button("java-help-sklauncher", "Get SKlauncher", Kind::Secondary, &t)
+                        button("java-help-sklauncher", tr("Get SKlauncher"), Kind::Secondary, &t)
                             .on_click(|_, _, cx| cx.open_url(backend::SKLAUNCHER_DOWNLOADS)),
                     )
                     .child(
-                        button("java-help-versions", "Versions", Kind::Ghost, &t).on_click(
+                        button("java-help-versions", tr("Versions"), Kind::Ghost, &t).on_click(
                             cx.listener(|this, _: &ClickEvent, _, cx| {
                                 this.go(Page::Versions);
                                 cx.notify();

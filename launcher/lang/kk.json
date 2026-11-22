@@ -1258,5 +1258,10 @@
   "My Website": "My Website",
   "My Profile": "My Profile",
   "No Java instance yet — add one with + beside Instances.": "No Java instance yet — add one with + beside Instances.",
-  "No Rust instance yet — add one with + beside Instances.": "No Rust instance yet — add one with + beside Instances."
+  "No Rust instance yet — add one with + beside Instances.": "No Rust instance yet — add one with + beside Instances.",
+  "Draw Shader API 0.2 shader packs": "Draw Shader API 0.2 shader packs",
+  "Get SKlauncher": "Get SKlauncher",
+  "Preparing Horizon reads your own Minecraft: Java Edition, which needs Java. New here? Download SKlauncher — its installer brings Java — then get the latest release, 26.3, from Versions.": "Preparing Horizon reads your own Minecraft: Java Edition, which needs Java. New here? Download SKlauncher — its installer brings Java — then get the latest release, 26.3, from Versions.",
+  "Starts the game with HORIZON_HDR_FRAME=float, the switch it draws 0.2 packs behind: Neoqua, Daybreak and the rest. On by default here; off runs the game on its ordinary gamma frame.": "Starts the game with HORIZON_HDR_FRAME=float, the switch it draws 0.2 packs behind: Neoqua, Daybreak and the rest. On by default here; off runs the game on its ordinary gamma frame.",
+  "{version} available · this build updates by hand": "{version} available · this build updates by hand"
 }
