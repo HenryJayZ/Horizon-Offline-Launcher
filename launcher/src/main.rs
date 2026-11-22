@@ -2751,9 +2751,8 @@ fn notice(text_: String, t: &Theme) -> Div {
     /// New here, and preparing failed for want of Java: where to get a runtime (SKlauncher's
     /// installer brings one), and where the newest release is. Horizon reads a player's own
     /// Minecraft: Java Edition install through Java, so a machine with none cannot prepare yet.
-    fn java_help(&mut self, cx: &mut Context<Self>) -> Div {
-        let t = self.theme;
-        plate(&t)
+    fn java_help(t: &Theme, cx: &mut Context<Launcher>) -> Div {
+        plate(t)
             .flex()
             .flex_col()
             .gap(px(10.))
@@ -3736,7 +3735,7 @@ impl Launcher {
             // Preparing reads the player's own Minecraft install through Java: with none on the
             // machine, say where to get one and where the newest release is.
             if e.to_uppercase().contains("JAVA") {
-                page = page.child(self.java_help(cx));
+                page = page.child(java_help(&t, cx));
             }
         }
         page = page.child(if t.glass {

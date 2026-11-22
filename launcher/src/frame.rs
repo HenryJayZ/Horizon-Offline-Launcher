@@ -647,7 +647,7 @@ impl Launcher {
                             .px(px(8.))
                             .pt(px(2.))
                             .child(tr("Modded by HenryJayz btw :3")),
-                    ),
+                    )
                     // A newer launcher exists and this build never replaces itself: say so where
                     // the player can act, and send them to this fork's releases.
                     .when(self.updates.launcher.is_some(), |d| {
